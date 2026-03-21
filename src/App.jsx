@@ -38,7 +38,11 @@ function ErrorScreen({ error, onRetry }) {
             Tekrar Dene
           </button>
           <button
-            onClick={() => window.location.href = '/login'}
+           onClick={() => {
+  localStorage.clear()
+  sessionStorage.clear()
+  window.location.href = '/login'
+}}
             className="btn btn-secondary"
           >
             Giriş Sayfasına Git
