@@ -7,20 +7,57 @@ import Customers from './pages/Customers'
 import Reminders from './pages/Reminders'
 import Settings from './pages/Settings'
 import Admin from './pages/Admin'
-import { Flower2 } from 'lucide-react'
+import { Flower2, RefreshCw, AlertCircle } from 'lucide-react'
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="text-center">
+        <Flower2 className="w-12 h-12 text-primary-500 animate-pulse mx-auto mb-4" />
+        <p className="text-stone-500">Yükleniyor...</p>
+      </div>
+    </div>
+  )
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <Flower2 className="w-12 h-12 text-primary-500 animate-pulse mx-auto mb-4" />
-          <p className="text-stone-500">Yükleniyor...</p>
+function ErrorScreen({ error, onRetry }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 p-4">
+      <div className="text-center max-w-md">
+        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <h2 className="text-xl font-semibold text-stone-800 mb-2">Bir Sorun Oluştu</h2>
+        <p className="text-stone-500 mb-6">{error}</p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={onRetry}
+            className="btn btn-primary"
+          >
+            <RefreshCw className="w-5 h-5" />
+            Tekrar Dene
+          </button>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="btn btn-secondary"
+          >
+            Giriş Sayfasına Git
+          </button>
         </div>
       </div>
-    )
+    </div>
+  )
+}
+
+function ProtectedRoute({ children }) {
+  const { user, loading, authError, retryAuth } = useAuth()
+
+  if (loading) {
+    return <LoadingScreen />
+  }
+
+  if (authError) {
+    return <ErrorScreen error={authError} onRetry={retryAuth} />
   }
 
   if (!user) {
@@ -31,17 +68,14 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
-  const { user, loading } = useAuth()
+  const { user, loading, authError, retryAuth } = useAuth()
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <Flower2 className="w-12 h-12 text-primary-500 animate-pulse mx-auto mb-4" />
-          <p className="text-stone-500">Yükleniyor...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen />
+  }
+
+  if (authError && !user) {
+    return <ErrorScreen error={authError} onRetry={retryAuth} />
   }
 
   return (
