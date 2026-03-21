@@ -1,5 +1,3 @@
-import { supabase } from './supabase'
-
 const SUPABASE_URL = 'https://qycsekkegulnqmiepjnc.supabase.co'
 
 export const sendReminderEmail = async (event, tenant) => {
@@ -20,6 +18,9 @@ export const sendReminderEmail = async (event, tenant) => {
   
   // HTML formatına çevir
   messageHtml = messageHtml.replace(/\n/g, '<br>')
+
+  // Fotoğraf URL'lerini topla
+  const photoUrls = event.photos?.map(p => p.photo_url) || []
   
   const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
     method: 'POST',
@@ -39,11 +40,17 @@ export const sendReminderEmail = async (event, tenant) => {
               ${messageHtml}
             </p>
           </div>
+          ${photoUrls.length > 0 ? `
+          <div style="margin-top: 20px; text-align: center;">
+            <p style="color: #a8a29e; font-size: 14px;">📸 ${photoUrls.length} fotoğraf ekte gönderilmiştir.</p>
+          </div>
+          ` : ''}
           <div style="text-align: center; margin-top: 30px; color: #a8a29e; font-size: 12px;">
             <p>Bu email ${tenant.business_name} tarafından gönderilmiştir.</p>
           </div>
         </div>
-      `
+      `,
+      photos: photoUrls
     })
   })
 
