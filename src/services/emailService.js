@@ -18,17 +18,13 @@ export const sendReminderEmail = async (event, tenant) => {
     .replace(/{etkinlik_türü}/g, event.event_type || '')
     .replace(/{işletme_adı}/g, tenant.business_name || '')
   
-  // HTML formatına çevir (satır sonlarını <br> yap)
+  // HTML formatına çevir
   messageHtml = messageHtml.replace(/\n/g, '<br>')
-  
-  // Email gönder
-  const { data: sessionData } = await supabase.auth.getSession()
   
   const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${sessionData.session?.access_token}`
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       to: customer.email,
@@ -47,10 +43,7 @@ export const sendReminderEmail = async (event, tenant) => {
             <p>Bu email ${tenant.business_name} tarafından gönderilmiştir.</p>
           </div>
         </div>
-      `,
-      customerName: customer.first_name,
-      eventType: event.event_type,
-      businessName: tenant.business_name
+      `
     })
   })
 
