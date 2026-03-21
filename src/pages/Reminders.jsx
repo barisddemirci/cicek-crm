@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
+import { sendReminderEmail } from '../services/emailService'
 import { 
   Calendar, 
   Clock, 
@@ -103,9 +104,10 @@ export default function Reminders() {
     setSending(event.id)
 
     try {
-      // Here you would integrate with an email service like Resend
-      // For now, we'll just mark it as sent
+      // Gerçek email gönder
+      await sendReminderEmail(event, tenant)
       
+      // Event'i sent olarak işaretle
       const { error } = await supabase
         .from('events')
         .update({ status: 'sent' })
@@ -120,11 +122,11 @@ export default function Reminders() {
         status: 'sent'
       })
 
-      alert('Hatırlatma gönderildi! (Demo modunda gerçek e-posta gönderilmez)')
+      alert('✅ Hatırlatma e-postası başarıyla gönderildi!')
       fetchEvents()
     } catch (error) {
       console.error('Error sending reminder:', error)
-      alert('Bir hata oluştu')
+      alert('❌ Email gönderilemedi: ' + error.message)
     } finally {
       setSending(null)
     }
